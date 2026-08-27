@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "strict": true,
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "outDir": "lib",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "baseUrl": ".",
+    "paths": {
+      "@deepseek-ai/dsh-tools": ["./stubs/dsh-tools.d.ts"],
+      "@deepseek-ai/dsh-session": ["./stubs/dsh-session.d.ts"],
+      "@deepseek-ai/dsh-llm": ["./stubs/dsh-llm.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
