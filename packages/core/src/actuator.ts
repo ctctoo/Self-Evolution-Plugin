@@ -1,13 +1,13 @@
 /**
  * Actuator.
  *
- * Applies an approved `FixPlan` inside a sandbox directory (Readme:
- * "Actuator 在沙箱内对源码进行修改"). It NEVER touches production: every
- * write stays under `sandboxRoot`, the source is first copied into a fresh
- * sandbox workspace, and each planned change is validated against the copy.
+ * Applies an approved `FixPlan` inside a sandbox directory. It NEVER touches
+ * production: every write stays under `sandboxRoot`, the source is first
+ * copied into a fresh sandbox workspace, and each planned change is validated
+ * against the copy.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { join, resolve, sep } from 'node:path'
+import { join, resolve } from 'node:path'
 import type { ApplyResult, FixPlan, PlannedChange } from './types.ts'
 import { EvolutionRegistry, nextVersion } from './registry.ts'
 import { resolvePluginRoot } from './analyzer.ts'
@@ -78,7 +78,6 @@ export class Actuator {
     const recordId = `rec_${plan.planId}`
     const appliedDir = join(this.#sandboxRoot, `${plan.targetPlugin}@${childVersion}`)
 
-    // Fresh sandbox workspace: copy the plugin, then apply each change.
     rmSync(appliedDir, { recursive: true, force: true })
     mkdirSync(appliedDir, { recursive: true })
     cpSync(sourceRoot, appliedDir, { recursive: true })

@@ -1,5 +1,5 @@
 {
-  "name": "@self-evolution/dsh-plugin",
+  "name": "@self-evolution/core",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
@@ -20,16 +20,7 @@
     "build": "tsc -b",
     "typecheck": "tsc -b --pretty false"
   },
-  "dependencies": {
-    "@self-evolution/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/schemastery": "^3.18.1"
-  },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/schemastery": "^3.18.1",
     "@types/node": "^22.5.0",
     "typescript": "^5.5.4"
   }

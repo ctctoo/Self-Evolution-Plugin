@@ -1,13 +1,11 @@
 /**
- * EvolutionEngine — the composite service behind `ctx.selfEvolution`.
+ * EvolutionEngine — the composite self-evolution service.
  *
  * Wires the five loop components (Analyzer, Inspector, Actuator, Tester,
- * Cover) plus the metrics collector and the lineage registry, and attaches
- * DSH event listeners so runtime signals flow into the loop and health
- * monitoring feeds automatic rollback.
+ * Cover) plus the metrics collector and the lineage registry. This is the
+ * platform-agnostic core; adapters feed events via `metrics` and `cover`
+ * directly.
  */
-import type { Context } from '@deepseek-ai/cordis'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import type { FixPlan, ApplyResult, TestReport, EvolveRecord, InspectorVerdict, EvolutionStatus, EvolutionCycleResult, SelfEvolutionService } from './types.ts'
 import { EvolutionRegistry } from './registry.ts'
 import { MetricsCollector } from './metrics.ts'
@@ -79,47 +77,6 @@ export class EvolutionEngine implements SelfEvolutionService {
       }
     }
     scan(root)
-  }
-
-  /** Attach DSH event listeners. Returns a disposer. */
-  attach(ctx: Context): () => void {
-    const disposers: (() => void)[] = []
-
-    disposers.push(
-      ctx.on('agent/error', (payload) => {
-        const text = String(payload.error ?? '')
-        let attributed = false
-        for (const [name, id] of this.#pluginNames) {
-          if (text.includes(name)) {
-            this.metrics.recordError(id)
-            this.cover.observeError(id)
-            attributed = true
-          }
-        }
-        if (!attributed) this.metrics.recordError('harness')
-      }),
-    )
-
-    disposers.push(
-      ctx.on('tools/result', (_exec, result) => {
-        if (result.isError) this.metrics.recordError('unknown')
-      }),
-    )
-
-    disposers.push(
-      ctx.on('session/event', (_session, event: SessionEvent) => {
-        if (event.type === 'turn/end') {
-          const reason = (event.data as { reason?: unknown }).reason
-          if (reason && typeof reason === 'object' && (reason as { kind?: string }).kind === 'aborted') {
-            this.metrics.recordAbortedTurn()
-          }
-        }
-      }),
-    )
-
-    return () => {
-      for (const dispose of disposers) dispose()
-    }
   }
 
   /** Resolve a plan reference (full object or planId). */
@@ -199,7 +156,6 @@ export class EvolutionEngine implements SelfEvolutionService {
         })!
         return { record: passed, passed: true, iterations: iteration + 1, lastReport: report }
       }
-      // Not passed: hand the error report back to the Analyzer and retry.
       this.registry.update(applied.record.recordId, { status: 'test-failed', testReport: report })
       current = this.analyzer.revise(current, report.errorReport ?? 'no details')
     }
@@ -245,3 +201,5 @@ export class EvolutionEngine implements SelfEvolutionService {
     return this.registry.history()
   }
 }
+
+export { resolvePluginRoot } from './analyzer.ts'

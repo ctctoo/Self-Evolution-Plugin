@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "self-evolution": {
+      "type": "local",
+      "command": ["node", "D:/Project/My/Self-Evolution-Plugin/packages/mcp/lib/index.js"],
+      "enabled": true,
+      "environment": {
+        "EVOLUTION_PLUGINS_ROOT": "D:/Project/My/Self-Evolution-Plugin/plugin",
+        "EVOLUTION_SANDBOX_ROOT": "D:/Project/My/Self-Evolution-Plugin/.evolution-sandbox",
+        "EVOLUTION_REGISTRY_FILE": "D:/Project/My/Self-Evolution-Plugin/.evolution/registry.jsonl"
+      }
+    }
+  }
+}

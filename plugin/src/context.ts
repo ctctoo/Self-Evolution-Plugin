@@ -3,12 +3,10 @@
  *
  * Augments the Cordis `Context` interface with the harness services this
  * plugin consumes (`tools`, `agents`, `sessions`, `settings`, `llm`) plus the
- * `selfEvolution` service it contributes. In the real DSH workspace these
- * first-party packages perform the same declaration merging; this module
- * keeps the contract in one place for standalone type-checking.
+ * `selfEvolution` service it contributes.
  */
 import type { Context } from '@deepseek-ai/cordis'
-import type { SelfEvolutionService } from './types.ts'
+import type { SelfEvolutionService } from '@self-evolution/core'
 import type { ToolRuntime } from '@deepseek-ai/dsh-tools'
 import type { AgentRegistry, SessionStore, SettingsProvider } from '@deepseek-ai/dsh-session'
 import type { LlmService } from '@deepseek-ai/dsh-llm'

@@ -15,7 +15,6 @@ export function nextVersion(parentVersion: string): string {
   if (match?.[1]) {
     return `v${Number(match[1]) + 1}`
   }
-  // Non-semantic parents (e.g. "1.2.3") step the patch digit.
   const semver = /^(\d+)\.(\d+)\.(\d+)$/.exec(parentVersion)
   if (semver) {
     return `${semver[1]}.${semver[2]}.${Number(semver[3]) + 1}`
@@ -41,8 +40,7 @@ export class EvolutionRegistry {
       try {
         this.#records.push(JSON.parse(line) as EvolveRecord)
       } catch {
-        // A torn tail line is invalid lineage evidence; ignore it. The JSONL
-        // append discipline makes corruption possible only at the physical tail.
+        // A torn tail line is invalid lineage evidence; ignore it.
       }
     }
   }

@@ -1,10 +1,9 @@
 /**
  * Runtime metrics collector.
  *
- * Consumes DSH events (`tools/result`, `tools/execute` latency, `agent/error`,
- * `turn/end`) and folds them into the `EvolutionMetrics` consumed by the
- * Analyzer. The collector is intentionally small and pure in-memory: it is
- * the plugin-level log/metrics normalization step of the evolution loop.
+ * Consumes runtime events (tool latency, errors, aborted turns) and folds
+ * them into `EvolutionMetrics` consumed by the Analyzer. Platform-agnostic:
+ * adapters feed events from their host's event system.
  */
 import type { EvolutionMetrics, EvolveSignal } from './types.ts'
 

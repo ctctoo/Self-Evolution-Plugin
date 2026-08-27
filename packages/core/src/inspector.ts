@@ -2,16 +2,15 @@
  * Inspector.
  *
  * Reviews `FixPlan`s against a hard-coded, immutable rule set before any
- * change is applied (Readme: "Inspector 按照预先设计好的规则以及约束对
- * Plan 进行审查，通过后交给执行器 Actuator"). Rules are pure: they take a
- * plan and a read-only inspection context and return findings. `error`
- * findings block approval; `warning` findings are advisory.
+ * change is applied. Rules are pure: they take a plan and a read-only
+ * inspection context and return findings. `error` findings block approval;
+ * `warning` findings are advisory.
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { join, isAbsolute, resolve, sep } from 'node:path'
 import type { FixPlan, InspectorFinding, InspectorRule, InspectorVerdict, InspectionContext } from './types.ts'
 
-/** Literal high-risk code markers (Readme § malicious-code detector). */
+/** Literal high-risk code markers. */
 const HIGH_RISK_MARKERS: readonly string[] = [
   'process.exit(',
   'eval(',
@@ -156,8 +155,6 @@ export const INSPECTOR_RULES: readonly InspectorRule[] = [
     id: 'scope/size-budget',
     severity: 'warning',
     check(plan, context) {
-      // Size budget is enforced at apply time by the Actuator; here we only
-      // warn when the plan is suspiciously large relative to the plugin.
       if (!context.targetRoot) return []
       const total = plan.changes.reduce((acc, c) => acc + Buffer.byteLength(c.newText ?? c.oldText ?? ''), 0)
       if (total > 128 * 1024) {

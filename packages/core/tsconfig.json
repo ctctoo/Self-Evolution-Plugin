@@ -17,16 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
-    "baseUrl": ".",
-    "paths": {
-      "@deepseek-ai/dsh-tools": ["./stubs/dsh-tools.d.ts"],
-      "@deepseek-ai/dsh-session": ["./stubs/dsh-session.d.ts"],
-      "@deepseek-ai/dsh-llm": ["./stubs/dsh-llm.d.ts"]
-    },
     "composite": true
   },
-  "include": ["src/**/*.ts"],
-  "references": [
-    { "path": "../packages/core" }
-  ]
+  "include": ["src/**/*.ts"]
 }

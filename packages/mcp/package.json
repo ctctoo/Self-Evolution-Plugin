@@ -1,11 +1,14 @@
 {
-  "name": "@self-evolution/dsh-plugin",
+  "name": "@self-evolution/mcp",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "bin": {
+    "self-evolution-mcp": "bin/mcp.js"
+  },
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
@@ -14,22 +17,20 @@
   },
   "files": [
     "lib/**/*.js",
-    "lib/**/*.d.ts"
+    "lib/**/*.d.ts",
+    "bin/**/*.js"
   ],
   "scripts": {
     "build": "tsc -b",
+    "start": "node bin/mcp.js",
     "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {
-    "@self-evolution/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/schemastery": "^3.18.1"
+    "@modelcontextprotocol/server": "^2.0.0",
+    "@self-evolution/core": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/schemastery": "^3.18.1",
     "@types/node": "^22.5.0",
     "typescript": "^5.5.4"
   }

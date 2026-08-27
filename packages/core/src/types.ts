@@ -1,8 +1,7 @@
 /**
- * Core domain types of the DSH self-evolution plugin.
+ * Core domain types for the self-evolution system.
  *
- * These types model the controlled-evolution loop described in
- * `docs/architecture.zh.md` and the project Readme: an Analyzer emits
+ * These types model the controlled-evolution loop: an Analyzer emits
  * `FixPlan`s, an Inspector reviews them against immutable rules, an Actuator
  * applies them inside a sandbox, a Tester validates them, and a Cover
  * deploys the verified plugin outside the sandbox while keeping lineage and
@@ -36,7 +35,7 @@ export interface PlannedChange {
 export interface FixPlan {
   readonly planId: string
   readonly createdAt: number
-  /** Target plugin identity (the `name` the Cordis plugin registers). */
+  /** Target plugin identity. */
   readonly targetPlugin: string
   /** Version of the plugin this plan modifies (the parent in the lineage). */
   readonly targetVersion: string
@@ -153,7 +152,7 @@ export interface EvolutionMetrics {
   readonly abortedTurns: number
 }
 
-/** The public `ctx.selfEvolution` service surface. */
+/** The public self-evolution service surface. */
 export interface SelfEvolutionService {
   /** Run one evolution cycle for a candidate plan (review → apply → test). */
   runCycle(plan: FixPlan): Promise<EvolutionCycleResult>

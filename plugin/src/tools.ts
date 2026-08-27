@@ -3,14 +3,13 @@
  *
  * These tools expose the evolution loop to the harness's own agent: propose
  * (analyze), review (inspect), apply+test (actuate), deploy (cover), status,
- * and rollback. They are thin adapters over the {@link EvolutionEngine}
- * service, following `docs/cookbook/adding-a-tool.zh.md`.
+ * and rollback. They are thin adapters over the EvolutionEngine from
+ * @self-evolution/core.
  */
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { ToolOutputDefinition, ContentBlock } from '@deepseek-ai/dsh-tools'
-import type { FixPlan } from './types.ts'
-import type { EvolutionEngine } from './engine.ts'
+import type { FixPlan, EvolutionEngine } from '@self-evolution/core'
 
 /** Standard JSON output contract shared by every evolution tool. */
 const output: ToolOutputDefinition = {

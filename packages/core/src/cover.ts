@@ -1,12 +1,12 @@
 /**
  * Cover.
  *
- * Deploys a fully tested evolution outside the sandbox and owns rollback
- * (Readme: "通过后交给沙箱外的 Cover"). Deployment is a controlled
- * copy-replace: the previous plugin source is snapshotted into a backup
- * store first, so any later regression can restore the exact parent version.
- * The health window lets the harness observe the deployed plugin and roll
- * back automatically when error signals cross a threshold.
+ * Deploys a fully tested evolution outside the sandbox and owns rollback.
+ * Deployment is a controlled copy-replace: the previous plugin source is
+ * snapshotted into a backup store first, so any later regression can restore
+ * the exact parent version. The health window lets the host observe the
+ * deployed plugin and roll back automatically when error signals cross a
+ * threshold.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -55,8 +55,6 @@ export class Cover {
     rmSync(target, { recursive: true, force: true })
     mkdirSync(target, { recursive: true })
     cpSync(prod, target, { recursive: true })
-    // The evolution being deployed comes from `appliedDir`; snapshot it too so
-    // a rollback can restore this exact deployed state later.
     const deployedSnapshot = join(this.#backupRoot, `${pluginId}@${version}.deployed`)
     rmSync(deployedSnapshot, { recursive: true, force: true })
     mkdirSync(deployedSnapshot, { recursive: true })
@@ -91,7 +89,6 @@ export class Cover {
    * rolled-back record, or undefined when there is nothing to restore.
    */
   rollback(pluginId: string, reason = 'health threshold exceeded'): EvolveRecord | undefined {
-    // Restore from the most recent backed-up deployed state, if any.
     const latest = this.#registry.latestSettled(pluginId)
     if (!latest) return undefined
     const deployedSnapshot = join(this.#backupRoot, `${pluginId}@${latest.childVersion}.deployed`)
@@ -130,7 +127,6 @@ export class Cover {
     const deployedAt = this.#deployedAt.get(pluginId)
     if (deployedAt === undefined) return
     if (Date.now() - deployedAt > this.#healthWindow.durationMs) {
-      // Window expired: stop watching.
       this.#deployedAt.delete(pluginId)
       return
     }

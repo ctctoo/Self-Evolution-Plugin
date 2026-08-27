@@ -3,16 +3,13 @@
  *
  * Mounts the `ctx.selfEvolution` service, attaches DSH event listeners for
  * metrics and health monitoring, and registers the model-facing evolution
- * tools. Follows the DSH plugin conventions from
- * `docs/cookbook/adding-a-package.zh.md`: a `name`, `inject` declarations,
- * an `apply(ctx, config)` that registers only reversible side effects, and a
- * schemastery `Config`.
+ * tools. Uses @self-evolution/core as the platform-agnostic engine.
  */
 import type { Context } from '@deepseek-ai/cordis'
+import { EvolutionEngine } from '@self-evolution/core'
+import type { SelfEvolutionService } from '@self-evolution/core'
 import { Config, type Config as ConfigType } from './config.ts'
-import { EvolutionEngine } from './engine.ts'
 import { registerEvolutionTools } from './tools.ts'
-import type { SelfEvolutionService } from './types.ts'
 import './context.ts'
 
 export const name = 'self-evolution'
@@ -33,7 +30,6 @@ export function apply(ctx: Context, config: ConfigType) {
     protectedPlugins: config.protected,
   })
 
-  // Publish the service. The assignment is undone on plugin reload.
   ctx.effect(() => {
     ctx.selfEvolution = engine
     return () => {
@@ -41,9 +37,41 @@ export function apply(ctx: Context, config: ConfigType) {
     }
   })
 
-  // Feed runtime events into metrics + health monitoring.
-  ctx.effect(() => engine.attach(ctx))
+  ctx.effect(() => attachDshEvents(ctx, engine))
 
-  // Expose the loop to the harness's own agent.
   ctx.effect(() => registerEvolutionTools(ctx, engine))
+}
+
+/** Attach DSH event listeners for metrics and health monitoring. */
+function attachDshEvents(ctx: Context, engine: EvolutionEngine): () => void {
+  const disposers: (() => void)[] = []
+
+  disposers.push(
+    ctx.on('agent/error', (payload) => {
+      const text = String(payload.error ?? '')
+      engine.metrics.recordError('harness')
+      void text
+    }),
+  )
+
+  disposers.push(
+    ctx.on('tools/result', (_exec, result) => {
+      if (result.isError) engine.metrics.recordError('unknown')
+    }),
+  )
+
+  disposers.push(
+    ctx.on('session/event', (_session, event) => {
+      if (event.type === 'turn/end') {
+        const reason = (event.data as { reason?: unknown }).reason
+        if (reason && typeof reason === 'object' && (reason as { kind?: string }).kind === 'aborted') {
+          engine.metrics.recordAbortedTurn()
+        }
+      }
+    }),
+  )
+
+  return () => {
+    for (const dispose of disposers) dispose()
+  }
 }

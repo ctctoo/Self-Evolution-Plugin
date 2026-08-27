@@ -1,15 +1,10 @@
 /**
  * Tester.
  *
- * Validates an evolved plugin inside the sandbox before deployment (Readme:
- * "Actuator 在沙箱内对源码进行修改，修改完成后通过 Tester 进行多轮测试，
- * 如果未通过返回给 Analyzer 并携带错误报告，再次进行循环，通过后交给
- * 沙箱外的 Cover").
- *
+ * Validates an evolved plugin inside the sandbox before deployment.
  * The runner is injectable. The built-in static smoke runner is deterministic
- * and dependency-free; a runner backed by `ctx.subprocess` (or the sandbox
- * runner tool) can be attached by the host to execute real unit tests and
- * benchmark tasks inside the sandbox.
+ * and dependency-free; a runner backed by subprocess execution can be attached
+ * by the host.
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
@@ -64,7 +59,6 @@ export class StaticSmokeRunner implements TestRunner {
     const { plan, appliedDir } = request
     const cases: RunnerCase[] = []
 
-    // 1. Manifest parses and keeps the interface contract.
     const manifestPath = join(appliedDir, 'package.json')
     if (!existsSync(manifestPath)) {
       cases.push({ caseId: 'manifest', name: 'package.json exists', passed: false, durationMs: 0, detail: 'missing' })
@@ -78,7 +72,6 @@ export class StaticSmokeRunner implements TestRunner {
       }
     }
 
-    // 2. Every changed file exists (create) and is non-empty.
     for (const change of plan.changes) {
       const rel = change.file
       const full = join(appliedDir, rel)
@@ -94,7 +87,6 @@ export class StaticSmokeRunner implements TestRunner {
       cases.push({ caseId: `file:${rel}`, name: `${rel} exists`, passed: content.length > 0, durationMs: 0, detail: content.length === 0 ? 'empty file' : undefined })
     }
 
-    // 3. Every TypeScript source remains structurally balanced.
     for (const file of collectTsFiles(appliedDir)) {
       const content = readFileSync(file, 'utf8')
       const rel = relative(appliedDir, file).split(sep).join('/')

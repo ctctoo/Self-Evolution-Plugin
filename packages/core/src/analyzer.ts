@@ -2,14 +2,10 @@
  * Analyzer.
  *
  * Analyzes source and runtime data to find fixable problems and emits
- * `FixPlan`s (Readme: "Analyzer 的作用是分析源码和运行日志发现其中可修改
- * 的问题然后输出 FixPlan，交给 Inspector").
- *
- * The default generator is deterministic: it maps each problem signal to a
- * concrete, minimal `PlannedChange` using signal metadata. A more capable
- * generator (e.g. one backed by the LLM seam) can be attached through
- * {@link Analyzer.setGenerator} by other plugins; the Inspector remains the
- * authority on whether a plan is safe.
+ * `FixPlan`s. The default generator is deterministic: it maps each problem
+ * signal to a concrete, minimal `PlannedChange` using signal metadata. A more
+ * capable generator (e.g. one backed by an LLM) can be attached through
+ * {@link Analyzer.setGenerator}.
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -54,10 +50,8 @@ export function defaultPlanGenerator(
   options: { maxPlanBytes?: number } = {},
 ): FixPlan | undefined {
   if (signal.kind !== 'error') return undefined
-  // Only generate plans when a real package exists to modify.
   if (!targetRoot) return undefined
 
-  // Heuristic: an erroring tool often belongs to a source file named after it.
   const toolRef = signal.ref.includes(':')
     ? signal.ref.split(':').at(-1) ?? signal.ref
     : signal.ref
@@ -66,7 +60,6 @@ export function defaultPlanGenerator(
 
   if (existsSync(filePath)) {
     const content = readFileSync(filePath, 'utf8')
-    // Do not propose anything larger than the configured budget.
     if (options.maxPlanBytes && Buffer.byteLength(content) > options.maxPlanBytes) {
       return undefined
     }
@@ -87,7 +80,7 @@ export function defaultPlanGenerator(
           kind: 'edit',
           oldText: content,
           newText: `/* ${signal.summary} */\n${content}`,
-          reason: 'Annotate the failing tool with diagnostic context before re-evaluating; the Inspector may reject this if it does not address the root cause.',
+          reason: 'Annotate the failing tool with diagnostic context before re-evaluating.',
         },
       ],
       expectedImpact: 'Reduce silent failures for repeated tool errors.',
@@ -118,7 +111,6 @@ export class Analyzer {
   analyze(signals: readonly EvolveSignal[], options: { maxPlanBytes?: number } = {}): readonly FixPlan[] {
     const plans: FixPlan[] = []
     for (const signal of signals) {
-      // Skip plugins already mid-evolution to avoid overlapping mutations.
       if (this.#registry.active().some((r) => r.pluginId === signal.plugin)) continue
       const targetRoot = resolvePluginRoot(this.#pluginsRoot, signal.plugin)
       const plan = this.#generator(signal, targetRoot)
@@ -131,10 +123,7 @@ export class Analyzer {
     return plans
   }
 
-  /**
-   * Revise a plan with test feedback (the Tester's error report) so the next
-   * apply/test iteration carries the failure evidence forward.
-   */
+  /** Revise a plan with test feedback for the next iteration. */
   revise(plan: FixPlan, errorReport: string): FixPlan {
     const evidence: EvidenceRef[] = [
       ...plan.evidence,
