@@ -2,6 +2,7 @@
   "name": "self-evolution-plugin",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "DeepSeek Harness (DSH) self-evolution plugin: controlled, verifiable, rollback-safe plugin-level evolution.",
   "packageManager": "pnpm@11.7.0",
   "scripts": {

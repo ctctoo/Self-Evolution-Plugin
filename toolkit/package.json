@@ -2,6 +2,7 @@
   "name": "@self-evolution/toolkit",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
   "bin": {
